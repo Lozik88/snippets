@@ -1,0 +1,38 @@
+[paths]
+public_keys = "public key path"
+
+[servers.SqlServer1.prod]
+ServerAddress = "192.168.0.1"
+Database = "Adventureworks2021"
+Username = "someUserName"
+password = "someHashedValue"
+
+[servers.SqlServer1.stage]
+ServerAddress = "192.168.0.1"
+Database = "Adventureworks2021"
+Username = "someUserName"
+password = "someHashedValue"
+
+[servers.SqlServer1.dev]
+ServerAddress = "192.168.0.1"
+Database = "Adventureworks2021"
+Username = "someUserName"
+password = "someHashedValue"
+
+[servers.SqlServer2.prod]
+ServerAddress = "localhost"
+Database = "Adventureworks2021"
+Username = "someUserName"
+password = "someHashedValue"
+
+[servers.SqlServer2.stage]
+ServerAddress = "localhost"
+Database = "Adventureworks2021"
+Username = "someUserName"
+password = "someHashedValue"
+
+[servers.SqlServer2.dev]
+ServerAddress = "localhost"
+Database = "Adventureworks2021"
+Username = "someUserName"
+password = "someHashedValue"
