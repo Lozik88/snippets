@@ -51,10 +51,25 @@ def _check_overwrite(path,overwrite):
     if os.path.exists(path) and overwrite==False:
         raise IOError(
             f"""{path} already exists. Raising exception as a precaution. 
-            Set overwrite to True to overwrite the file. Ensure the old file are backed up.""")
+            Set overwrite to True to overwrite the file. Ensure the old file is backed up.""")
+def _check_element(conf:dict,value:str,check_type:str):
+    """
+    Returns empty dictionary if no case insensitve dups are present in conf keys. 
+    """
+    matches = len([k for k in conf.keys() if value.lower() == k.lower()])
+    if check_type.lower() == 'dups':
+        if matches==1:
+            raise ValueError(f"{value} already exists. Use a different name or update the contents of the element.")
+        else:
+            return {}
+    elif check_type.lower() == 'exists':
+        if matches != 1:
+            raise ValueError(f'{value} is not an existing key. Check the TOML file.')
+    else:
+        raise ValueError(f"{check_type} is an invalid input.")
 def _check_env(env:str):
     """
-    Validate incoming environment. Throw error for mismatches.
+    Validate incoming environment. Throw an error if incoming param is not in list.
     """
     if (['prod','stage','dev']).count(env.lower()) == 0:
         raise ValueError('env parameter must be prod, stage, or dev')
@@ -68,7 +83,7 @@ def read_config(conf_path:str):
     """
     Reads and existing TOML file. Returns dictionary
     """
-    with open(conf_path,'r') as f:
+    with open(conf_path,'r') as f:  
         return toml.load(f) 
 def read_key_file(
     env:str,
@@ -79,6 +94,8 @@ def read_key_file(
     """
     _check_env(env)
     conf = read_config(conf_path)
+    if 'private_keys' not in conf['paths'].keys():
+        raise ValueError(f"path.private_keys does not exist in {conf_path} consider using make_key_file(), or manually add it.")
     key_path = conf['paths']['private_keys'][env]['path']
     with open(key_path,'r') as f:
         return encode(json.load(f)['key'])
@@ -118,10 +135,9 @@ def make_config_shell(conf_path:str='config.toml',overwrite:bool=False):
         'owner':getpass.getuser(),
         'paths':{
         "private_keys":{},"output":{},"input":{}
-    },'servers':{}}
+    },'servers':{},'apis':{}}
     _write_config(conf_path,template)
     return _write_config(conf_path,template)
-
 def config_server(
     env:str
     ,server_name:str
@@ -131,6 +147,7 @@ def config_server(
     ,pw:str=None
     ,conf_path:str='config.toml'
     ,port:int=None
+    ,*kwargs
     ):
     """
     Adds a server to the TOML configuration file.
@@ -140,13 +157,14 @@ def config_server(
         conf = toml.load(f)
     if not 'servers' in conf.keys():
         conf['servers'] = {}
+    conf['servers'][server_name] = _check_element(conf['servers'],'server_name','dups')
     if username == None:
         username = getpass.getpass('Enter username.')
     if pw == None:
         pw = getpass.getpass('Enter password.')
     key = read_key_file(env,conf_path)
-    if not server_name.lower() in [k.lower() for k in conf['servers'].keys()]:
-        conf['servers'][server_name]={}
+    # if not server_name.lower() in [k.lower() for k in conf['servers'].keys()]:
+    #     conf['servers'][server_name]={}
     conf['servers'][server_name][env]={
             "address":server_address,
             "database":dbname,
@@ -155,8 +173,34 @@ def config_server(
             "password":decode(encrypt(key,pw))
         }
     _write_config(conf_path,conf)
-def update_server_creds(env:str,username:str,password:str):
-    _check_env()
+def update_server_creds(
+    env:str
+    ,server_name:str
+    ,username:str=None
+    ,pw:str=None
+    ,conf_path:str='config.toml'):
+    """
+    Updates a servers credentials.
+
+    Parameters
+    ---
+    env : str
+        enviroment of the profile. Must be either prod, stage or dev.
+    conf_path : str (default config.toml)
+        Path of the TOML file. Defaults to the current location of the .py file.
+    """
+    _check_env(env)
+    conf = read_config(conf_path)
+    _check_element(conf['servers'],server_name,'exists')
+    server_name = [k for k in conf['servers'].keys() if server_name.lower() == k.lower()][0]
+    if username == None:
+        username = getpass.getpass('Enter username.')
+    if pw == None:
+        pw = getpass.getpass('Enter password.')
+    key = read_key_file(env,conf_path)
+    conf['servers'][server_name][env]['username'] = decode(encrypt(key,username))
+    conf['servers'][server_name][env]['password'] = decode(encrypt(key,pw))
+    _write_config(conf_path,conf)   
 def get_server_info(
     env:str
     ,server_name:str
@@ -173,11 +217,51 @@ def get_server_info(
         raise ValueError(f"{server_name}'s {env} environment was not found in the TOML file. Use add_server_config() to add the server info for {env}")
     data = conf['servers'][server_name][env]
     key = read_key_file(env,conf_path)
+    data['server_name'] = server_name
     data['username'] = decode(decrypt(key,encode(data['username'])))
     data['password'] = decode(decrypt(key,encode(data['password'])))
     return data
+def config_api(
+    env:str,
+    api_name:str,
+    url:str,
+    # endpoint:dict,
+    auth_creds:dict=None,
+    auth_url:str=None,
+    token_url:str=None,
+    conf_path:str='config.toml'
+    ):
+    """
+    Adds API info to TOML config.
+    """
+    _check_env(env)
+    conf = read_config(conf_path)
+    if not 'apis' in conf.keys():
+        conf['apis'] = {}
+    key = read_key_file(env,conf_path)
+    encrypted_auth={}
+    if auth_creds != None:
+        for k,v in auth_creds.items():
+            encrypted_auth[k] = decode(encrypt(key,v))
+    if not api_name.lower() in [k.lower() for k in conf['apis'].keys()]:
+        conf['apis'][api_name]={}
+    conf['apis'][api_name][env]={
+            "url":url,
+            # "endpoint":endpoint,
+            "auth_creds":encrypted_auth,
+            "auth_url":auth_url,
+            "token_url":token_url
+        }
+    _write_config(conf_path,conf)
+def update_api_auth(
+    env:str,
+    auth:dict,
+    conf_path:str='config.path'
 
-# make_config_shell() #should error
+):
+    pass
+
+
 make_config_shell(overwrite=True) #should pass
 for v in ['prod','stage','dev']:
     make_key_file(v,f'{v}_key.json','config.toml',True)
@@ -186,34 +270,29 @@ lst=[]
 
 config_server('prod',"SqlServer1","localhost",'AdventureWorks2021',username='lozik',pw='afca1')
 lst.append(get_server_info('prod','SqlServer1'))
-config_server('prod',"SqlServer1","localhost",'AdventureWorks2021',username='lozik',pw='afc#$a1')
+config_server('stage',"SqlServer1","localhost",'AdventureWorks2021',username='lozik',pw='afc#$a1')
+lst.append(get_server_info('stage','SqlServer1'))
+config_server('dev',"SqlServer1","localhost",'AdventureWorks2021',username='lozik',pw='afc#$a1')
+lst.append(get_server_info('dev','SqlServer1'))
+
+config_server('prod',"SqlServer1","localhost",'AdventureWorks2021',username='lozik',pw='afca1')
 lst.append(get_server_info('prod','SqlServer1'))
+update_server_creds('prod','sqlserver1','kizol','this is an update1')
+lst.append(get_server_info('prod','SqlServer1'))
+# update_server_creds('prod','SQLlserVer1','dozik','this is an update2')
+# lst.append(get_server_info('prod','SqlServer1'))
+# update_server_creds('prod','SQLlserVer12','dozik','this is an update2')
+# lst.append(get_server_info('prod','SqlServer12'))
 
-config_server('dev',"SqlServer1","localhost",'AdventureWorks2021',username='lozidfk',pw='af2ec#$a1')
-lst.append(get_server_info('dev','SqlServer1'))
-config_server('dev',"SqlServer1","localhost",'AdventureWorks2021',username='loziffdfk',pw='af32ec#$a1')
-lst.append(get_server_info('dev','SqlServer1'))
-
-config_server('stage',"SqlServer1","localhost",'AdventureWorks2021',username='lozidfk',pw='afoook2e%#$a1')
-lst.append(get_server_info('stage','SqlServer1'))
-config_server('stage',"SqlServer1","localhost",'AdventureWorks2021',username='loziffdfk',pw='affypck#$a1')
-lst.append(get_server_info('stage','SqlServer1'))
-
-
-config_server('prod',"SqlServer2","loc192.alhost",'okok',username='lozidfk',pw=r'afzzzzzz$#@%%*c')
-lst.append(get_server_info('prod','SqlServer2'))
-config_server('prod',"SqlServer2","c192.al",'okok',username='lozidfk',pw=r'QQQ2ec#$($*%a1')
-lst.append(get_server_info('prod','SqlServer2'))
-
-config_server('dev',"SqlServer2","localhost",'AdventureWorks2021',username='lozidfk',pw='af2ec#$a1')
-lst.append(get_server_info('dev','SqlServer2'))
-config_server('dev',"SqlServer2","localhost",'AdventureWorks2021',username='loziffdfk',pw='af32ec#$a1')
-lst.append(get_server_info('dev','SqlServer2'))
-
-config_server('stage',"SqlServer2","localhost",'AdventureWorks2021',username='lozidfk',pw='afoook2e%#$a1')
-lst.append(get_server_info('stage','SqlServer2'))
-config_server('stage',"SqlServer2","localhost",'AdventureWorks2021',username='loziffdfk',pw='affypck#$a1')
-lst.append(get_server_info('stage','SqlServer2'))
 
 df = DataFrame(lst)
+config_api(
+    'prod'
+    ,'Kroger'
+    ,url='https://api.kroger.com/v1/'
+    ,auth_creds={'client_id':'lozik','client_secret':'someOauth2pw1'}
+    ,auth_url='https://api.kroger.com/v1/connect/oauth2/authorize'
+    ,token_url='https://api.kroger.com/v1/connect/oauth2/token'
+)
+
 ""

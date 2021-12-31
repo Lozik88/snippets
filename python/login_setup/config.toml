@@ -4,6 +4,11 @@ owner = "lozik"
 
 [paths.input]
 
+[apis.Kroger.prod]
+url = "https://api.kroger.com/v1/"
+auth_url = "https://api.kroger.com/v1/connect/oauth2/authorize"
+token_url = "https://api.kroger.com/v1/connect/oauth2/token"
+
 [paths.private_keys.prod]
 path = "/home/lozik/code/snippets/python/login_setup/prod_key.json"
 
@@ -16,35 +21,9 @@ path = "/home/lozik/code/snippets/python/login_setup/dev_key.json"
 [servers.SqlServer1.prod]
 address = "localhost"
 database = "AdventureWorks2021"
-username = "gAAAAABhzNy7kbXMIIAqt3O0mAtfWRL7-UjAyDPqS5_oGWMRr38MJmjECjC6W5eTo2_CxupXgEG-sJIjqcTQySKrB8TE-k2tDw=="
-password = "gAAAAABhzNy7vnIsEo6sI1PpZP81ARnFk_3pwBA82S0xhkktJiBlhz02Zt0BAGjjVWzi5-Eewm2G7of21IYbpHI7gkmQIXSBHg=="
+username = "gAAAAABhz13qyiTKiKecvCfFCDdj3OZC-EpXQvj0FanR0qJncg3Istw-476kvlLE2u4yQ0DQHRKeeCeKRo_WhRntNNCeI7MA1g=="
+password = "gAAAAABhz13qjt4Ivv7hQHIhXe1MvGIoiISAB4W0WNmvJ0pwmwN7WSK0PLf6X0RNRUhTQG4JZPjIdy_v8Rt0CJTHsmy9yvVPoDa8XFp8e6l6XeszPKWy6SA="
 
-[servers.SqlServer1.dev]
-address = "localhost"
-database = "AdventureWorks2021"
-username = "gAAAAABhzNy7gDeLw0LQW9Aa_zKUH6alFvS0pxGGd_woqOVM_qqBNshHg9Ln5h1T9ZzVx7il088qM4Hr3oDH-BfHZFfHfkeMzg=="
-password = "gAAAAABhzNy7lrXygEFAlYoKN-9FqLurOjFIx8IGb2XVyYNEKu6f0EUphXwGsF8WbZf3vowepcjsC_EgueTE0t56LKicSA9KmQ=="
-
-[servers.SqlServer1.stage]
-address = "localhost"
-database = "AdventureWorks2021"
-username = "gAAAAABhzNy777l-KrHDW6ns4FV94s1tf05EF5TjK_FK_xRLdO5cI2m-HnaqGqg5WaJCbqEIx7Gq2EhL6vYUxcYN5cvUdoZebg=="
-password = "gAAAAABhzNy7iPWRx3YazQidbHfeib3wXRA8gjgW3GaBTLDQ-tT-HCG4fgoqVL3AcAdY9IRJPB6e2_zGvng7hyn23lNfa9w8OQ=="
-
-[servers.SqlServer2.prod]
-address = "c192.al"
-database = "okok"
-username = "gAAAAABhzNy7y9cqWjlKtRvgynvVvwtcK5EQKky79PKy5nKvEYR1vItaiz-91R6CB7Kq-Hxgnw3eOotZG_NTS-q0vNegLATSIg=="
-password = "gAAAAABhzNy7n0xwhibEIR5tqiCC4duTYS2JQYXfXLNDuo74bOJLkqw60F-a0j6EErVFju6KN8Zh9F5XR1zs615_u99Rm31_sA=="
-
-[servers.SqlServer2.dev]
-address = "localhost"
-database = "AdventureWorks2021"
-username = "gAAAAABhzNy7GTX9wF2VHvFPnQBnBn931AxVgWXm2R-HwGFQDmK7QEQzp07WImpt40NdRZPtxrL31CLzZDV6ItlzaOtIFQTsnQ=="
-password = "gAAAAABhzNy7m3ErMBOxupEWAb-TrKWezl5U4DxH31LBdxM0lZ4oJvNJVuvGtHBNFQvbW26V1LhNm4SYU_1-wjFOD4Xqr4dqsw=="
-
-[servers.SqlServer2.stage]
-address = "localhost"
-database = "AdventureWorks2021"
-username = "gAAAAABhzNy7YKgbA4ggLBvmcmrqiTS8v2nBuV25j1c4B1dEKG-M7i2pfDRHFxobg7VtaG4UivK0Oe8B8JO5-zeuoBx-uv_hLw=="
-password = "gAAAAABhzNy7mvZ-YM_9ZPG3ySzrfM8tqIBN7lBh6sYrwTqDQC_9VPdthfN3bl5j27x3qr5r8fV9hsdH16mRZapKWfiLmzbMsg=="
+[apis.Kroger.prod.auth_creds]
+client_id = "gAAAAABhz138jkP9RX0ZTs2h-lfnrtxRt3mPOxONGZtXwzfqcV3jwQLnf5a9Gh9PB_dden9UOjb0FO5TTEU_uFH44mqu0Ga8xQ=="
+client_secret = "gAAAAABhz138m9ffS36kImQGEL43_6GLli6Q0xTPoOX0O1Ti-VDVzkkavIwb6L_XgAp8xX9jJIQx83KRvzzKDtB5tZJluHQ9fQ=="
