@@ -4,26 +4,38 @@ owner = "lozik"
 
 [paths.input]
 
+[paths.private_keys.prod]
+path = "/home/lozik/.auth/prod_key.json"
+
+[paths.private_keys.stage]
+path = "/home/lozik/.auth/stage_key.json"
+
+[paths.private_keys.dev]
+path = "/home/lozik/.auth/dev_key.json"
+
 [apis.Kroger.prod]
 url = "https://api.kroger.com/v1/"
 auth_url = "https://api.kroger.com/v1/connect/oauth2/authorize"
 token_url = "https://api.kroger.com/v1/connect/oauth2/token"
 
-[paths.private_keys.prod]
-path = "/home/lozik/code/snippets/python/login_setup/prod_key.json"
-
-[paths.private_keys.stage]
-path = "/home/lozik/code/snippets/python/login_setup/stage_key.json"
-
-[paths.private_keys.dev]
-path = "/home/lozik/code/snippets/python/login_setup/dev_key.json"
-
 [servers.SqlServer1.prod]
 address = "localhost"
 database = "AdventureWorks2021"
-username = "gAAAAABhz13qyiTKiKecvCfFCDdj3OZC-EpXQvj0FanR0qJncg3Istw-476kvlLE2u4yQ0DQHRKeeCeKRo_WhRntNNCeI7MA1g=="
-password = "gAAAAABhz13qjt4Ivv7hQHIhXe1MvGIoiISAB4W0WNmvJ0pwmwN7WSK0PLf6X0RNRUhTQG4JZPjIdy_v8Rt0CJTHsmy9yvVPoDa8XFp8e6l6XeszPKWy6SA="
+username = "gAAAAABh0jUEOjvM-p50qB8bsilYLPJ0_GBoEBlzEnbM_YdLM4iIx93Xg8zWe6bl-Exfwob1Vl_4u39D7I4pQBYJAGIJAN1JWQ=="
+password = "gAAAAABh0jUEtj9Lvrc5atY-_ZH19kl-wcNQjPmDqHx89_1pN8-Vi7qoZ0I-iAXUJoMvxHOmTNfv9fcjUVneOher-1QHDVc8v25NCdxPwvoxlGqZRABY-Yw="
+
+[servers.SqlServer1.stage]
+address = "localhost"
+database = "AdventureWorks2021"
+username = "gAAAAABh0jUEJvB2cCb3JXvOmqpDBSO0S5O8Ky6n51ziRavBBEKPMlxad-KVd58zZhWGBLAFjuGDNwEYTXW8iuY5rZv7ItXICQ=="
+password = "gAAAAABh0jUES4Q_s7E-IPHYkq1Am0iw8RbIiBtxHbuJp8kDAaU4Qq56h-wwJ4AdB1A2GkvO69-duHiIy7SEgFfycrqPCoPgrA=="
+
+[servers.SqlServer1.dev]
+address = "localhost"
+database = "AdventureWorks2021"
+username = "gAAAAABh0jUE1nxDvc75qRB5nkKDrSBzIYtr1JfspYtLAcbfz20b4w9CkwaO-xl0UJx3Xfyqa2ASLds4LC5f0GONb2zF_RmEkA=="
+password = "gAAAAABh0jUEp1TVwIy5bRS9qvHMJkxyq5sne5B91I_jFEGdOengBAZrJcLDCQXM3if7R_3jMIKapoY9Q5xyg_gu06ItBfpedg=="
 
 [apis.Kroger.prod.auth_creds]
-client_id = "gAAAAABhz138jkP9RX0ZTs2h-lfnrtxRt3mPOxONGZtXwzfqcV3jwQLnf5a9Gh9PB_dden9UOjb0FO5TTEU_uFH44mqu0Ga8xQ=="
-client_secret = "gAAAAABhz138m9ffS36kImQGEL43_6GLli6Q0xTPoOX0O1Ti-VDVzkkavIwb6L_XgAp8xX9jJIQx83KRvzzKDtB5tZJluHQ9fQ=="
+client_id = "gAAAAABh0jUE2mfFg8HsVKR8olzOmTKO_RKadsAC9AdiUjcPxrj0vhUEya454eaWqr_blX3GO2kbkcjhI6YQUAOrK9V9YW6YGlzTypFsRcykHHPtsVoTjzs="
+client_secret = "gAAAAABh0jUERIm6RSQSePAWZ1xk65EHDS57KX7lg0bPlroMlh1qamNvjwGhXTO1qUBkEoPSuviCgTTa-DQYRZVYmdM3dNSVPQXv1jqQV-zaT5y4m4hAWjY="
