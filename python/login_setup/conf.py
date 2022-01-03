@@ -14,8 +14,6 @@ from cryptography.fernet import Fernet
 class FileExistsError(Exception):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
-    def check_overwrite(self):
-        pass
 
 def encode(obj):
     """
@@ -41,7 +39,7 @@ def decode(byte:bytes):
 
 def encrypt(key:bytes,value:object):
     """
-    Encrypts a value using a Fernet key.
+    Encrypts a value using a Fernet key. Decode bytes to non-bytes value.
     """
     f = Fernet(key)
     value = encode(value)
@@ -63,6 +61,9 @@ def _check_overwrite(path,overwrite):
             f"""{path} already exists. Raising exception as a precaution. 
             Set overwrite to True to overwrite the file. Ensure the old file is backed up.""")
 def _check_element(conf:dict,env:str,group:str,lookup_value:str):
+    """
+    A validation tool to ensure we're working in a clean TOML structure.
+    """
     d = {}
     matches = [k for k in conf[group].keys() if lookup_value.lower() == k.lower()]
     if len(matches)==0:
@@ -78,6 +79,9 @@ def _check_element(conf:dict,env:str,group:str,lookup_value:str):
     return d
 
 def _make_element(conf:dict,env:str,group:str,profile:str):
+    """
+    
+    """
     if not group in conf.keys():
         conf[group] = {}
     if not profile.lower() in [v.lower() for v in conf[group].keys()]:
@@ -102,6 +106,11 @@ def _write_config(conf_path:str,d:dict):
 def read_config(conf_path:str):
     """
     Reads and existing TOML file. Returns dictionary
+
+    Parameters
+    ---
+    conf_path : str (default config.toml)
+        Path of the TOML file. Defaults to the current location of the .py file.
     """
     with open(conf_path,'r') as f:  
         return toml.load(f) 
@@ -112,6 +121,13 @@ def read_key_file(
     ):
     """
     Returns secured keyfile.
+
+    Parameters
+    ---
+    env : str
+        Environment of the profile. Must be either prod, stage or dev.
+    conf_path : str (default config.toml)
+        Path of the TOML file. Defaults to the current location of the .py file.
     """
     _check_env(env)
     conf = read_config(conf_path)
@@ -129,6 +145,17 @@ def make_key_file(
     ):
     """
     Creates .json file containing key. 
+
+    Parameters
+    ---
+    env : str
+        Environment of the profile. Must be either prod, stage or dev.
+    key_path : str
+        Path where the private key will be stored.
+    conf_path : str (default config.toml)
+        Path of the TOML file. Defaults to the current location of the .py file.
+    overwrite : bool (default False)
+        Will throw an error if TOML file exists and is not set to False.
     """
     _check_overwrite(key_path,overwrite)
     _check_env(env)
@@ -167,14 +194,31 @@ def config_server(
     ,server_name:str
     ,server_address:str
     ,dbname:str
+    ,port:int=None
     ,username:str=None
     ,pw:str=None
     ,conf_path:str='config.toml'
-    ,port:int=None
     ,*kwargs
     ):
     """
     Adds a server to the TOML configuration file.
+
+    Parameters
+    ---
+    env : str
+        Environment of the profile. Must be either prod, stage or dev.
+    server_name : str
+        Nickname of the server. Not the actual server name.
+    dbname : str 
+        Database name
+    port : int (Default None)
+        Server port. 
+    username : str (Default None)
+        Username of the account.
+    pw : str (Default None)
+        Password of the account.
+    conf_path : str (default config.toml)
+        Path of the TOML file. Defaults to the current location of the .py file.
     """
     _check_env(env)
     with open(conf_path) as f:
@@ -206,7 +250,13 @@ def update_server_creds(
     Parameters
     ---
     env : str
-        enviroment of the profile. Must be either prod, stage or dev.
+        Environment of the profile. Must be either prod, stage or dev.
+    server_name : str
+        Nickname of the server. Not the actual server name.
+    username : str
+        Username of the account.
+    pw : str
+        Password of the account.
     conf_path : str (default config.toml)
         Path of the TOML file. Defaults to the current location of the .py file.
     """
@@ -229,7 +279,16 @@ def get_server_info(
     ,conf_path:str='config.toml'
     ):
     """
-    Returns a dictionary of containing server information.
+    Returns a dictionary containing server information.
+    
+    Parameters
+    ---
+    env : str
+        Environment of the profile. Must be either prod, stage or dev.
+    server_name : str
+        Nickname of the server. Not the actual server name.
+    conf_path : str (default config.toml)
+        Path of the TOML file. Defaults to the current location of the .py file.
     """
     _check_env(env)
     conf = read_config(conf_path)
@@ -257,18 +316,35 @@ def config_api(
     ):
     """
     Adds API info to TOML config.
+
+    Parameters
+    ---
+    env : str
+        Environment of the profile. Must be either prod, stage or dev.
+    api_name : str
+        Nickname of the api.
+    auth_creds : dict (default None)
+        dictionary containing autorization data.
+    auth_url : str (default None)
+        url used to authenticate user. All values are encrypted when written to TOML.
+    token_url : str (default None)
+        url used to generate user token.
+    conf_path : str (default config.toml)
+        Path of the TOML file. Defaults to the current location of the .py file.
     """
     _check_env(env)
     conf = read_config(conf_path)
-    if not 'apis' in conf.keys():
-        conf['apis'] = {}
+    # if not 'apis' in conf.keys():
+    #     conf['apis'] = {}
+    # if not api_name.lower() in [k.lower() for k in conf['apis'].keys()]:
+    #     conf['apis'][api_name]={}
+    _make_element(conf,env,'apis',api_name)
     key = read_key_file(env,conf_path)
     encrypted_auth={}
     if auth_creds != None:
         for k,v in auth_creds.items():
             encrypted_auth[k] = encrypt(key,v)
-    if not api_name.lower() in [k.lower() for k in conf['apis'].keys()]:
-        conf['apis'][api_name]={}
+
     conf['apis'][api_name][env]={
             "url":url,
             "auth_creds":encrypted_auth,
@@ -283,6 +359,20 @@ def update_api_auth(
     auth_creds:dict,
     conf_path:str='config.toml'
     ):
+    """
+    Updates api's auth info.
+
+    Parameters
+    ---
+    env : str
+        Environment of the profile. Must be either prod, stage or dev.
+    api_name : str
+        Nickname of the api.
+    auth_creds : dict (default None)
+        dictionary containing autorization data. All values are encrypted when written to TOML.
+    conf_path : str (default config.toml)
+        Path of the TOML file. Defaults to the current location of the .py file.
+    """
     _check_env(env)
     conf = read_config(conf_path)
     api = _check_element(conf,env,'apis',api)
@@ -299,7 +389,16 @@ def get_api_info(
     ,conf_path:str='config.toml'
     ):
     """
-    Returns a dictionary of containing server information.
+    Returns a dictionary of containing api information.
+
+    Parameters
+    ---
+    env : str
+        Environment of the profile. Must be either prod, stage or dev.
+    api_name : str
+        Nickname of the api.
+    conf_path : str (default config.toml)
+        Path of the TOML file. Defaults to the current location of the .py file.
     """
     _check_env(env)
     conf = read_config(conf_path)
@@ -312,8 +411,7 @@ def get_api_info(
         auth_creds[k]=decrypt(key,v)
     data['auth_creds'] = auth_creds
     return data
-def get_info():
-    pass
+
 make_config_shell(overwrite=True) #should pass
 for v in ['prod','stage','dev']:
     make_key_file(v,f'/home/lozik/.auth/{v}_key.json','config.toml',True)

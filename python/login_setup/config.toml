@@ -21,21 +21,21 @@ token_url = "https://api.kroger.com/v1/connect/oauth2/token"
 [servers.SqlServer1.prod]
 address = "localhost"
 database = "AdventureWorks2021"
-username = "gAAAAABh0jUEOjvM-p50qB8bsilYLPJ0_GBoEBlzEnbM_YdLM4iIx93Xg8zWe6bl-Exfwob1Vl_4u39D7I4pQBYJAGIJAN1JWQ=="
-password = "gAAAAABh0jUEtj9Lvrc5atY-_ZH19kl-wcNQjPmDqHx89_1pN8-Vi7qoZ0I-iAXUJoMvxHOmTNfv9fcjUVneOher-1QHDVc8v25NCdxPwvoxlGqZRABY-Yw="
+username = "gAAAAABh0pILq1JSOWvcCuEapDJK68_cYBuhCdo6KRLNZkPF9plLyV4JsbDq1IL8gsfXKW8rQ_i0Hcw551TVCpBYZhiQXP0lng=="
+password = "gAAAAABh0pIL0k05KRh2WuWQ2NmBM2ygPu1AczIg1U1gtgqsFGe3LqD7dKh4bF0amXRQr-qE4AijFnQtfh4aKYl6XH9Z8VHdnWT-pVO4y9ZntfzOjeRU43M="
 
 [servers.SqlServer1.stage]
 address = "localhost"
 database = "AdventureWorks2021"
-username = "gAAAAABh0jUEJvB2cCb3JXvOmqpDBSO0S5O8Ky6n51ziRavBBEKPMlxad-KVd58zZhWGBLAFjuGDNwEYTXW8iuY5rZv7ItXICQ=="
-password = "gAAAAABh0jUES4Q_s7E-IPHYkq1Am0iw8RbIiBtxHbuJp8kDAaU4Qq56h-wwJ4AdB1A2GkvO69-duHiIy7SEgFfycrqPCoPgrA=="
+username = "gAAAAABh0pILmBeGtq1aJT1zyd06Z5zyzIwaMN2ChbLKZMVPP8ZOOenqaAiVYD3W-70dxu9jCPHKYrN9MlksVdeZEPYRqN2j2A=="
+password = "gAAAAABh0pILKcO430DizgLlWOTPhCggcsWHNx37zqmV6f2_OuDfaZjycTbkgvPHLm7a51kAuUyVx7OcB-txZ1gbfc7u_b2hJA=="
 
 [servers.SqlServer1.dev]
 address = "localhost"
 database = "AdventureWorks2021"
-username = "gAAAAABh0jUE1nxDvc75qRB5nkKDrSBzIYtr1JfspYtLAcbfz20b4w9CkwaO-xl0UJx3Xfyqa2ASLds4LC5f0GONb2zF_RmEkA=="
-password = "gAAAAABh0jUEp1TVwIy5bRS9qvHMJkxyq5sne5B91I_jFEGdOengBAZrJcLDCQXM3if7R_3jMIKapoY9Q5xyg_gu06ItBfpedg=="
+username = "gAAAAABh0pILnHGr3lSLZq3EIQ3fCUbddB4pCkH3KJms0t-QoPuoN8HM3dYWhQmSJyjn-xwm_4dyghbxSjo-tsMeH4UlHb1A8Q=="
+password = "gAAAAABh0pILcsheqTq_cLequQmowykCj_96Q22LvwJt92YnPkC1xGRVujMAur6Pfs4t5cXAMi0C2ZVYgUIZpN7-sqiMmlmxvw=="
 
 [apis.Kroger.prod.auth_creds]
-client_id = "gAAAAABh0jUE2mfFg8HsVKR8olzOmTKO_RKadsAC9AdiUjcPxrj0vhUEya454eaWqr_blX3GO2kbkcjhI6YQUAOrK9V9YW6YGlzTypFsRcykHHPtsVoTjzs="
-client_secret = "gAAAAABh0jUERIm6RSQSePAWZ1xk65EHDS57KX7lg0bPlroMlh1qamNvjwGhXTO1qUBkEoPSuviCgTTa-DQYRZVYmdM3dNSVPQXv1jqQV-zaT5y4m4hAWjY="
+client_id = "gAAAAABh0pILhtcl3sj4W1J8bFv6z31Dx5ZO-QS0U1IlLiNvnX5NALr6sMiJj7un4ebxH8Qp51nWTpK408_dXhXJhfG2dv7IKJraWjYI60CrpysWJJYX8nU="
+client_secret = "gAAAAABh0pILpwCQFgZzUDUojcNdLzBRzNJK7NECi5sxyhhPkJ7Xe9uUpKrHn4y_q2KKVd2kW69O2EU9gdS2rISJmXomAIHujI5gSy9LiXWsTY8ucGGUXkc="
