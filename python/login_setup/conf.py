@@ -80,7 +80,7 @@ def _check_element(conf:dict,env:str,group:str,lookup_value:str):
 
 def _make_element(conf:dict,env:str,group:str,profile:str):
     """
-    
+    Performs a check on certain elements in the dict. If they don't exist, they are created.
     """
     if not group in conf.keys():
         conf[group] = {}
