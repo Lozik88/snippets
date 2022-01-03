@@ -169,7 +169,7 @@ def make_key_file(
     conf['paths']['private_keys'][env]['path'] = key_path    
     _write_config(conf_path,conf)
 
-def make_config_shell(conf_path:str='config.toml',overwrite:bool=False):
+def make_shell(conf_path:str='config.toml',overwrite:bool=False):
     """
     Creates a new TOML configuration file using a predefined template.
     
@@ -185,13 +185,13 @@ def make_config_shell(conf_path:str='config.toml',overwrite:bool=False):
         'owner':getpass.getuser(),
         'paths':{
         "private_keys":{},"output":{},"input":{}
-    },'servers':{},'apis':{}}
+    },'databases':{},'apis':{}}
     _write_config(conf_path,template)
     return _write_config(conf_path,template)
 
-def config_server(
+def config_db(
     env:str
-    ,server_name:str
+    ,profile_name:str
     ,server_address:str
     ,dbname:str
     ,port:int=None
@@ -207,7 +207,7 @@ def config_server(
     ---
     env : str
         Environment of the profile. Must be either prod, stage or dev.
-    server_name : str
+    profile_name : str
         Nickname of the server. Not the actual server name.
     dbname : str 
         Database name
@@ -223,13 +223,13 @@ def config_server(
     _check_env(env)
     with open(conf_path) as f:
         conf = toml.load(f)
-    conf = _make_element(conf,env,'servers',server_name)
+    conf = _make_element(conf,env,'databases',profile_name)
     if username == None:
         username = getpass.getpass('Enter username.')
     if pw == None:
         pw = getpass.getpass('Enter password.')
     key = read_key_file(env,conf_path)
-    conf['servers'][server_name][env]={
+    conf['databases'][profile_name][env]={
             "address":server_address,
             "database":dbname,
             "port":port,
@@ -238,20 +238,20 @@ def config_server(
         }
     _write_config(conf_path,conf)
 
-def update_server_creds(
+def update_db_creds(
     env:str
-    ,server_name:str
+    ,profile_name:str
     ,username:str=None
     ,pw:str=None
     ,conf_path:str='config.toml'):
     """
-    Updates a servers credentials.
+    Updates a datbase credential.
 
     Parameters
     ---
     env : str
         Environment of the profile. Must be either prod, stage or dev.
-    server_name : str
+    profile_name : str
         Nickname of the server. Not the actual server name.
     username : str
         Username of the account.
@@ -262,20 +262,20 @@ def update_server_creds(
     """
     _check_env(env)
     conf = read_config(conf_path)
-    # replace server_name variable and replace using existing keyname in TOML to match case.
-    server_name = _check_element(conf,env,'servers',server_name)
+    # replace profile_name variable and replace using existing keyname in TOML to match case.
+    profile_name = _check_element(conf,env,'databases',profile_name)
     if username == None:
         username = getpass.getpass('Enter username.')
     if pw == None:
         pw = getpass.getpass('Enter password.')
     key = read_key_file(env,conf_path)
-    conf['servers'][server_name][env]['username'] = encrypt(key,username)
-    conf['servers'][server_name][env]['password'] = encrypt(key,pw)
+    conf['databases'][profile_name][env]['username'] = encrypt(key,username)
+    conf['databases'][profile_name][env]['password'] = encrypt(key,pw)
     _write_config(conf_path,conf)
 
-def get_server_info(
+def get_db_info(
     env:str
-    ,server_name:str
+    ,profile_name:str
     ,conf_path:str='config.toml'
     ):
     """
@@ -285,28 +285,28 @@ def get_server_info(
     ---
     env : str
         Environment of the profile. Must be either prod, stage or dev.
-    server_name : str
+    profile_name : str
         Nickname of the server. Not the actual server name.
     conf_path : str (default config.toml)
         Path of the TOML file. Defaults to the current location of the .py file.
     """
     _check_env(env)
     conf = read_config(conf_path)
-    server_name = _check_element(conf,env,'servers',server_name)
-    if not server_name.lower() in [k.lower() for k in conf['servers'].keys()]:
-        raise Exception(f"{server_name} was not found in the TOML file. Check the spelling, or add the server using add_server_config()")
-    if not env.lower() in [k.lower() for k in conf['servers'][server_name].keys()]:
-        raise Exception(f"{server_name}'s {env} environment was not found in the TOML file. Use add_server_config() to add the server info for {env}")
-    data = conf['servers'][server_name][env]
+    profile_name = _check_element(conf,env,'databases',profile_name)
+    if not profile_name.lower() in [k.lower() for k in conf['databases'].keys()]:
+        raise Exception(f"{profile_name} was not found in the TOML file. Check the spelling, or add the server using add_db_config()")
+    if not env.lower() in [k.lower() for k in conf['databases'][profile_name].keys()]:
+        raise Exception(f"{profile_name}'s {env} environment was not found in the TOML file. Use add_db_config() to add the server info for {env}")
+    data = conf['databases'][profile_name][env]
     key = read_key_file(env,conf_path)
-    data['server_name'] = server_name
+    data['profile_name'] = profile_name
     data['username'] = decrypt(key,data['username'])
     data['password'] = decrypt(key,data['password'])
     return data
 
 def config_api(
     env:str,
-    api_name:str,
+    profile_name:str,
     url:str,
     # endpoint:dict,
     auth_creds:dict=None,
@@ -321,7 +321,7 @@ def config_api(
     ---
     env : str
         Environment of the profile. Must be either prod, stage or dev.
-    api_name : str
+    profile_name : str
         Nickname of the api.
     auth_creds : dict (default None)
         dictionary containing autorization data.
@@ -336,16 +336,16 @@ def config_api(
     conf = read_config(conf_path)
     # if not 'apis' in conf.keys():
     #     conf['apis'] = {}
-    # if not api_name.lower() in [k.lower() for k in conf['apis'].keys()]:
-    #     conf['apis'][api_name]={}
-    _make_element(conf,env,'apis',api_name)
+    # if not profile_name.lower() in [k.lower() for k in conf['apis'].keys()]:
+    #     conf['apis'][profile_name]={}
+    _make_element(conf,env,'apis',profile_name)
     key = read_key_file(env,conf_path)
     encrypted_auth={}
     if auth_creds != None:
         for k,v in auth_creds.items():
             encrypted_auth[k] = encrypt(key,v)
 
-    conf['apis'][api_name][env]={
+    conf['apis'][profile_name][env]={
             "url":url,
             "auth_creds":encrypted_auth,
             "auth_url":auth_url,
@@ -355,7 +355,7 @@ def config_api(
 
 def update_api_auth(
     env:str,
-    api:str,
+    profile_name:str,
     auth_creds:dict,
     conf_path:str='config.toml'
     ):
@@ -366,7 +366,7 @@ def update_api_auth(
     ---
     env : str
         Environment of the profile. Must be either prod, stage or dev.
-    api_name : str
+    profile_name : str
         Nickname of the api.
     auth_creds : dict (default None)
         dictionary containing autorization data. All values are encrypted when written to TOML.
@@ -375,7 +375,7 @@ def update_api_auth(
     """
     _check_env(env)
     conf = read_config(conf_path)
-    api = _check_element(conf,env,'apis',api)
+    api = _check_element(conf,env,'apis',profile_name)
     key = read_key_file(env,conf_path)
     encrypted_auth_creds={}
     for k,v in auth_creds.items():
@@ -395,7 +395,7 @@ def get_api_info(
     ---
     env : str
         Environment of the profile. Must be either prod, stage or dev.
-    api_name : str
+    profile_name : str
         Nickname of the api.
     conf_path : str (default config.toml)
         Path of the TOML file. Defaults to the current location of the .py file.
@@ -412,27 +412,27 @@ def get_api_info(
     data['auth_creds'] = auth_creds
     return data
 
-make_config_shell(overwrite=True) #should pass
+make_shell(overwrite=True) #should pass
 for v in ['prod','stage','dev']:
     make_key_file(v,f'/home/lozik/.auth/{v}_key.json','config.toml',True)
 
 lst=[]
 
-config_server('prod',"SqlServer1","localhost",'AdventureWorks2021',username='lozik',pw='afca1')
-lst.append(get_server_info('prod','SqlServer1'))
-config_server('stage',"SqlServer1","localhost",'AdventureWorks2021',username='lozik',pw='afc#$a1')
-lst.append(get_server_info('stage','SqlServer1'))
-config_server('dev',"SqlServer1","localhost",'AdventureWorks2021',username='lozik',pw='afc#$a1')
-lst.append(get_server_info('dev','SqlServer1'))
+config_db('prod',"SqlServer1","localhost",'AdventureWorks2021',username='lozik',pw='afca1')
+lst.append(get_db_info('prod','SqlServer1'))
+config_db('stage',"SqlServer1","localhost",'AdventureWorks2021',username='lozik',pw='afc#$a1')
+lst.append(get_db_info('stage','SqlServer1'))
+config_db('dev',"SqlServer1","localhost",'AdventureWorks2021',username='lozik',pw='afc#$a1')
+lst.append(get_db_info('dev','SqlServer1'))
 
-config_server('prod',"SqlServer1","localhost",'AdventureWorks2021',username='lozik',pw='afca1')
-lst.append(get_server_info('prod','SqlServer1'))
-update_server_creds('prod','sqlserver1','kizol','this is an update1')
-lst.append(get_server_info('prod','SqlServer1'))
-# update_server_creds('prod','SQLlserVer1','dozik','this is an update2')
-# lst.append(get_server_info('prod','SqlServer1'))
-# update_server_creds('prod','SQLlserVer12','dozik','this is an update2')
-# lst.append(get_server_info('prod','SqlServer12'))
+config_db('prod',"SqlServer1","localhost",'AdventureWorks2021',username='lozik',pw='afca1')
+lst.append(get_db_info('prod','SqlServer1'))
+update_db_creds('prod','sqlserver1','kizol','this is an update1')
+lst.append(get_db_info('prod','SqlServer1'))
+# update_db_creds('prod','SQLlserVer1','dozik','this is an update2')
+# lst.append(get_db_info('prod','SqlServer1'))
+# update_db_creds('prod','SQLlserVer12','dozik','this is an update2')
+# lst.append(get_db_info('prod','SqlServer12'))
 
 
 df = DataFrame(lst)
